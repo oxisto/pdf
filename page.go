@@ -5,7 +5,9 @@
 package pdf
 
 import (
+	"bytes"
 	"fmt"
+	"math"
 	"strings"
 )
 
@@ -403,7 +405,7 @@ type gstate struct {
 }
 
 // Content returns the page's content.
-func (p Page) Content() Content {
+func (p Page) Content() *Content {
 	v := p.V.Key("Contents")
 
 	// The Contents key can either be a stream or an array of streams
@@ -412,7 +414,7 @@ func (p Page) Content() Content {
 	} else if v.Kind() == Array {
 		// In case the key is an array, we need to concatenate the contents of
 		// all streams
-		all := Content{}
+		all := &Content{}
 
 		for i := 0; i < v.Len(); i++ {
 			strm := v.Index(i)
@@ -427,7 +429,23 @@ func (p Page) Content() Content {
 	}
 }
 
-func (p Page) content(strm Value) Content {
+// Plain returns a (very) simple plain-text representation of the [Content].
+func (c *Content) Plain() string {
+	var buf = new(bytes.Buffer)
+
+	y := math.MaxFloat64
+	for _, t := range c.Text {
+		if t.Y < y {
+			buf.WriteByte('\n')
+		}
+		buf.WriteString(t.S)
+		y = t.Y
+	}
+
+	return buf.String()
+}
+
+func (p Page) content(strm Value) *Content {
 	var enc TextEncoding = &nopEncoder{}
 
 	var g = gstate{
@@ -442,13 +460,13 @@ func (p Page) content(strm Value) Content {
 			Trm := matrix{{g.Tfs * g.Th, 0, 0}, {0, g.Tfs, 0}, {0, g.Trise, 1}}.mul(g.Tm).mul(g.CTM)
 			w0 := g.Tf.Width(int(s[n]))
 			n++
-			if ch != ' ' {
-				f := g.Tf.BaseFont()
-				if i := strings.Index(f, "+"); i >= 0 {
-					f = f[i+1:]
-				}
-				text = append(text, Text{f, Trm[0][0], Trm[2][0], Trm[2][1], w0 / 1000 * Trm[0][0], string(ch)})
+			//if ch != ' ' {
+			f := g.Tf.BaseFont()
+			if i := strings.Index(f, "+"); i >= 0 {
+				f = f[i+1:]
 			}
+			text = append(text, Text{f, Trm[0][0], Trm[2][0], Trm[2][1], w0 / 1000 * Trm[0][0], string(ch)})
+			//}
 			tx := w0/1000*g.Tfs + g.Tc
 			if ch == ' ' {
 				tx += g.Tw
@@ -635,7 +653,7 @@ func (p Page) content(strm Value) Content {
 			g.Th = args[0].Float64() / 100
 		}
 	})
-	return Content{text, rect}
+	return &Content{text, rect}
 }
 
 // TextVertical implements sort.Interface for sorting
