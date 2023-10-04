@@ -4,7 +4,7 @@
 
 // Package pdf implements reading of PDF files.
 //
-// Overview
+// # Overview
 //
 // PDF is Adobe's Portable Document Format, ubiquitous on the internet.
 // A PDF document is a complex data format built on a fairly simple structure.
@@ -43,7 +43,6 @@
 // they are implemented only in terms of the Value API and could be moved outside
 // the package. Equally important, traversal of other PDF data structures can be implemented
 // in other packages as needed.
-//
 package pdf // import "rsc.io/pdf"
 
 // BUG(rsc): The package is incomplete, although it has been used successfully on some
@@ -600,7 +599,7 @@ func (v Value) RawString() string {
 	return x
 }
 
-// Text returns v's string value interpreted as a ``text string'' (defined in the PDF spec)
+// Text returns v's string value interpreted as a “text string” (defined in the PDF spec)
 // and converted to UTF-8.
 // If v.Kind() != String, Text returns the empty string.
 func (v Value) Text() string {
@@ -789,7 +788,7 @@ func (e *errorReadCloser) Close() error {
 
 // Reader returns the data contained in the stream v.
 // If v.Kind() != Stream, Reader returns a ReadCloser that
-// responds to all reads with a ``stream not present'' error.
+// responds to all reads with a “stream not present” error.
 func (v Value) Reader() io.ReadCloser {
 	x, ok := v.data.(stream)
 	if !ok {
