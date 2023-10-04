@@ -48,9 +48,6 @@ package pdf // import "rsc.io/pdf"
 // BUG(rsc): The package is incomplete, although it has been used successfully on some
 // large real-world PDF files.
 
-// BUG(rsc): There is no support for closing open PDF files. If you drop all references to a Reader,
-// the underlying reader will eventually be garbage collected.
-
 // BUG(rsc): The library makes no attempt at efficiency. A value cache maintained in the Reader
 // would probably help significantly.
 
@@ -96,9 +93,9 @@ func (r *Reader) errorf(format string, args ...interface{}) {
 	panic(fmt.Errorf(format, args...))
 }
 
-// Open opens a file for reading.
+// Open opens a file for reading. This function uses [os.Open] as the underlying
+// [io.Reader], thus [Reader.Close] should be used to close it.
 func Open(file string) (*Reader, error) {
-	// TODO: Deal with closing file.
 	f, err := os.Open(file)
 	if err != nil {
 		return nil, err
@@ -188,6 +185,16 @@ func NewReaderEncrypted(f io.ReaderAt, size int64, pw func() string) (*Reader, e
 // Trailer returns the file's Trailer value.
 func (r *Reader) Trailer() Value {
 	return Value{r, r.trailerptr, r.trailer}
+}
+
+// Close closes the underlying reader if it implements [io.Closer], e.g., if
+// this reader was opened with [Open]. Otherwise, it's a no-op.
+func (r *Reader) Close() error {
+	if c, ok := r.f.(io.Closer); ok {
+		return c.Close()
+	}
+
+	return nil
 }
 
 func readXref(r *Reader, b *buffer) ([]xref, objptr, dict, error) {
