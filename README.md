@@ -16,10 +16,10 @@ In order to display a very basic plain text representation of the PDF file, the 
 
 ```go
 import (
-	"fmt"
-	"os"
+    "fmt"
+    "os"
 
-	"github.com/oxisto/pdf"
+    "github.com/oxisto/pdf"
 )
 
 func main() {
@@ -39,6 +39,6 @@ func main() {
 The [`pdfcat`](./cmd/pdfcat/pdfcat.go) utility that is also included basically demonstrates the same functionality.
 
 ```bash
-go get github.com/oxisto/cmd/pdfcat@latest
+go install github.com/oxisto/pdf/cmd/pdfcat@latest
 pdfcat test.pdf
 ```
