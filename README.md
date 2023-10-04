@@ -1,5 +1,6 @@
 # pdf
 
+[![build](https://github.com/oxisto/pdf/actions/workflows/build.yml/badge.svg)](https://github.com/oxisto/pdf/actions/workflows/build.yml)
 [![Go
 Reference](https://pkg.go.dev/badge/github.com/oxisto.svg)](https://pkg.go.dev/github.com/oxisto/pdf)
 
