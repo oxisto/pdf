@@ -404,7 +404,30 @@ type gstate struct {
 
 // Content returns the page's content.
 func (p Page) Content() Content {
-	strm := p.V.Key("Contents")
+	v := p.V.Key("Contents")
+
+	// The Contents key can either be a stream or an array of streams
+	if v.Kind() == Stream {
+		return p.content(v)
+	} else if v.Kind() == Array {
+		// In case the key is an array, we need to concatenate the contents of
+		// all streams
+		all := Content{}
+
+		for i := 0; i < v.Len(); i++ {
+			strm := v.Index(i)
+			c := p.content(strm)
+			all.Text = append(all.Text, c.Text...)
+			all.Rect = append(all.Rect, c.Rect...)
+		}
+
+		return all
+	} else {
+		panic("unsupported value kind in Contents key")
+	}
+}
+
+func (p Page) content(strm Value) Content {
 	var enc TextEncoding = &nopEncoder{}
 
 	var g = gstate{
